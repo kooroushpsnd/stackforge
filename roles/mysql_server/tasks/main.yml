@@ -1,0 +1,59 @@
+---
+
+- name: Install MySQL server
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: yes
+
+- name: Start and enable MySQL
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Set MySQL root password
+  mysql_user:
+    login_user: root
+    login_password: ''
+    user: root
+    password: "{{ mysql_root_password }}"
+    host_all: yes
+  ignore_errors: true
+
+- name: Create application database
+  mysql_db:
+    name: "{{ mysql_db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create application user
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_user_password }}"
+    priv: "{{ mysql_db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Allow remote access from webservers
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  notify: Restart MySQL
+
+- name: Upload and run schema script
+  template:
+    src: init.sql.j2
+    dest: /tmp/init.sql
+
+- name: Apply initial schema
+  mysql_db:
+    name: "{{ mysql_db_name }}"
+    state: import
+    target: /tmp/init.sql
+    login_user: root
+    login_password: "{{ mysql_root_password }}"

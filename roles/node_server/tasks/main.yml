@@ -1,0 +1,35 @@
+---
+
+- name: Install Node.js dependencies
+  apt:
+    name: curl
+    state: present
+    update_cache: yes
+
+- name: Add Node.js APT key and repo
+  shell: curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+  args:
+    warn: false
+
+- name: Install Node.js
+  apt:
+    name: nodejs
+    state: present
+
+- name: Create app directory
+  file:
+    path: /opt/nodeapp
+    state: directory
+    mode: '0755'
+
+- name: Deploy server.js with custom message
+  template:
+    src: server.js.j2
+    dest: /opt/nodeapp/server.js
+
+- name: Start Node.js server
+  shell: nohup node /opt/nodeapp/server.js > /opt/nodeapp/output.log 2>&1 &
+  args:
+    chdir: /opt/nodeapp
+  async: 10
+  poll: 0

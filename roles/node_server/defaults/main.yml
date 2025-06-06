@@ -1,0 +1,2 @@
+nodejs_app_port: 3000
+nodejs_app_message: "Hello from default server"
