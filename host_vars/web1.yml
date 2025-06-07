@@ -1,0 +1,4 @@
+ansible_ssh_private_key_file: ~/.ssh/vagrant_keys/web1_key
+ansible_host: 192.168.56.10
+nodejs_app_message: "Hello from Server 1"
+nodejs_app_port: 3000

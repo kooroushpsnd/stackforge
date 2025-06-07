@@ -1,0 +1,60 @@
+- name: Install Traefik binary
+  get_url:
+    url: "https://github.com/traefik/traefik/releases/download/v2.10.5/traefik_v2.10.5_linux_amd64.tar.gz"
+    dest: /tmp/traefik.tar.gz
+
+- name: Extract Traefik binary
+  become: true
+  ansible.builtin.unarchive:
+    src: /tmp/traefik.tar.gz
+    dest: /usr/local/bin/
+    remote_src: yes
+    creates: /usr/local/bin/traefik
+
+- name: Create Traefik config directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/traefik
+    state: directory
+    mode: '0755'
+
+- name: Upload Traefik static config file
+  become: true
+  ansible.builtin.template:
+    src: traefik.yml.j2
+    dest: /etc/traefik/traefik.yml
+    mode: '0644'
+  notify: Restart traefik
+
+- name: Upload Traefik dynamic config file
+  become: true
+  ansible.builtin.copy:
+    src: dynamic.yml
+    dest: /etc/traefik/dynamic.yml
+    mode: '0644'
+  notify: Restart traefik
+
+- name: Create systemd service for Traefik
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/traefik.service
+    content: |
+      [Unit]
+      Description=Traefik Service
+      After=network.target
+      
+      [Service]
+      ExecStart=/usr/local/bin/traefik --configFile=/etc/traefik/traefik.yml
+      Restart=always
+      User=root
+      
+      [Install]
+      WantedBy=multi-user.target
+  notify: Restart traefik
+
+- name: Enable and start traefik service
+  become: true
+  ansible.builtin.systemd:
+    name: traefik
+    enabled: yes
+    state: started

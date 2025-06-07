@@ -48,6 +48,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "lbserver" do |lbserver|
     lbserver.vm.hostname = "lbserver"
     lbserver.vm.network "forwarded_port", guest: 80, host: 8080
+    lbserver.vm.network "forwarded_port", guest: 8081, host: 8081
     #if you need https uncomment this line
     # lbserver.vm.network "forwarded_port", guest: 443, host: 8443
     lbserver.vm.network "private_network", ip: "192.168.56.14"

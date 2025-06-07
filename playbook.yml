@@ -13,11 +13,12 @@
     - node_server
 
 - name: Deploy Traefik Server
-  hosts: lbservers
+  hosts: lbserver
+  become: true
   roles:
     - traefik_server
     
-- name: Deploy Prometheus and Grafana Server
-  hosts: monitoring
-  roles:
-    - monitoring_server
+# - name: Deploy Prometheus and Grafana Server
+#   hosts: monitoring
+#   roles:
+#     - monitoring_server

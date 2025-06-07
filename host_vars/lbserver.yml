@@ -1,0 +1,2 @@
+ansible_ssh_private_key_file: ~/.ssh/vagrant_keys/lbserver_key
+ansible_host: 192.168.56.14
