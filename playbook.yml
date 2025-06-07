@@ -1,4 +1,4 @@
-# this playbook deploy whole application
+this playbook deploy whole application
 
 - name: Deploy Mysql Server
   hosts: dbs
@@ -18,7 +18,8 @@
   roles:
     - traefik_server
     
-# - name: Deploy Prometheus and Grafana Server
-#   hosts: monitoring
-#   roles:
-#     - monitoring_server
+- name: Deploy Prometheus and Grafana Server
+  hosts: monitoring
+  become: true
+  roles:
+    - monitoring

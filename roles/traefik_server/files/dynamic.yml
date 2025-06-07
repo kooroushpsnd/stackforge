@@ -11,6 +11,18 @@ http:
       service: web2-service
       entryPoints:
         - web
+    
+    prometheus:
+      rule: "Host(`prometheus.localhost`)"
+      service: prometheus-service
+      entryPoints:
+        - web
+
+    grafana:
+      rule: "Host(`grafana.localhost`)"
+      service: grafana-service
+      entryPoints:
+        - web
 
   services:
     web1-service:
@@ -22,3 +34,13 @@ http:
       loadBalancer:
         servers:
           - url: "http://192.168.56.11:3001"
+
+    prometheus-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.56.13:9090"
+
+    grafana-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.56.13:3000"

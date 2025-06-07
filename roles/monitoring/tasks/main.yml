@@ -1,0 +1,60 @@
+- name: Install required APT transport packages
+  apt:
+    name: apt-transport-https
+    state: present
+    update_cache: yes
+
+- name: Add Grafana APT key
+  ansible.builtin.apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+
+- name: Add Grafana APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb https://packages.grafana.com/oss/deb stable main"
+    state: present
+    filename: grafana
+
+- name: Update APT cache after adding Grafana repo
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Prometheus and Grafana
+  apt:
+    name:
+      - prometheus
+      - grafana
+    state: present
+
+# ---------- Prometheus ----------
+
+- name: Configure Prometheus
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+  notify: Restart Prometheus
+
+- name: Ensure Prometheus is running and enabled
+  service:
+    name: prometheus
+    state: started
+    enabled: true
+
+# ---------- Grafana ----------
+
+- name: Configure Grafana
+  template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+  notify: Restart Grafana
+
+- name: Copy Grafana Prometheus datasource
+  copy:
+    src: grafana_datasource.yml
+    dest: /etc/grafana/provisioning/datasources/prometheus.yml
+
+- name: Ensure Grafana is running and enabled
+  service:
+    name: grafana-server
+    state: started
+    enabled: true
